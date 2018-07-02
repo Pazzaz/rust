@@ -1114,6 +1114,16 @@ fn test_iterator_last() {
 }
 
 #[test]
+fn test_chars_nth() {
+    let s = "ศไทย中华Việt Nam";
+    let mut it = s.chars();
+    let mut it2 = it.clone();
+    it.next();
+    it.next();
+    assert_eq!(it.next(), it2.nth(2));
+}
+
+#[test]
 fn test_bytesator() {
     let s = "ศไทย中华Việt Nam";
     let v = [
@@ -1216,6 +1226,19 @@ fn test_char_indices_last() {
     let mut it = s.char_indices();
     it.next();
     assert_eq!(it.last(), Some((27, 'm')));
+}
+
+#[test]
+fn test_char_indices_nth() {
+    let s = "ศไทย中华Việt Nam";
+    let mut it = s.char_indices();;
+    let mut it2 = it.clone();
+    it.next_back();
+    it2.next_back();
+    it.next();
+    it.next();
+    assert_eq!(it.next(), it2.nth(2));
+    assert_eq!(it.next_back(), it2.next_back());
 }
 
 #[test]
