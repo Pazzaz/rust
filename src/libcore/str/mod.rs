@@ -559,6 +559,31 @@ fn next_code_point_reverse<'a, I>(bytes: &mut I) -> Option<u32>
     Some(ch)
 }
 
+/// A simpler version of `next_code_point` that only consumes
+/// bytes for a code point without generating it.
+#[inline]
+fn consume_next_code_point<'a, I: Iterator<Item = &'a u8>>(bytes: &mut I) -> bool {
+    match bytes.next() {
+        Some(x) => {
+            match x {
+                0...127 => {}
+                128...0xDF => {
+                    bytes.next();
+                }
+                0xE0...0xEF => {
+                    bytes.nth(1);
+                }
+                0xF0...0xFF => {
+                    bytes.nth(2);
+                }
+                _ => unreachable!(),
+            }
+            true
+        }
+        None => false,
+    }
+}
+
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for Chars<'a> {
     type Item = char;
@@ -597,6 +622,20 @@ impl<'a> Iterator for Chars<'a> {
     fn last(mut self) -> Option<char> {
         // No need to go through the entire string.
         self.next_back()
+    }
+
+    #[inline]
+    fn nth(&mut self, mut n: usize) -> Option<char> {
+        if n == 0 {
+            return self.next();
+        }
+        while consume_next_code_point(&mut self.iter) {
+            if n == 1 {
+                return self.next();
+            }
+            n -= 1;
+        }
+        None
     }
 }
 
@@ -689,6 +728,17 @@ impl<'a> Iterator for CharIndices<'a> {
     fn last(mut self) -> Option<(usize, char)> {
         // No need to go through the entire string.
         self.next_back()
+    }
+
+    #[inline]
+    fn nth(&mut self, n: usize) -> Option<(usize, char)> {
+        if n > 0 {
+            let pre_len = self.iter.iter.len();
+            self.iter.nth(n-1);
+            let post_len = self.iter.iter.len();
+            self.front_offset += pre_len - post_len;
+        }
+        self.next()
     }
 }
 
