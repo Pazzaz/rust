@@ -364,7 +364,7 @@ impl str {
         for (i, c) in self[..].char_indices() {
             // Lowercase `char`s are inserted into `s` in slices,
             // uppercase `char`s are converted to lowercase and inserted individually.
-            if c.is_uppercase() {
+            if !c.is_lowercase() {
                 if lower != i {
                     unsafe {
                         // lower..i is an interval of lowercase `char`s before `c`.
@@ -444,7 +444,7 @@ impl str {
         for (i, c) in self[..].char_indices() {
             // Uppercase `char`s are inserted into `s` in slices,
             // lowercase `char`s are converted to uppercase and inserted individually.
-            if c.is_lowercase() {
+            if !c.is_uppercase() {
                 if lower != i {
                     unsafe {
                         // lower..i is an interval of uppercase `char`s before `c`.
