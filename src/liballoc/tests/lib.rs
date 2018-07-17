@@ -23,6 +23,7 @@
 #![feature(string_retain)]
 #![feature(try_reserve)]
 #![feature(unboxed_closures)]
+#![feature(vec_deque_reverse)]
 #![feature(exact_chunks)]
 
 extern crate alloc_system;
