@@ -929,6 +929,34 @@ fn test_append() {
 }
 
 #[test]
+fn test_reverse() {
+    let mut v = VecDeque::new();
+    assert_eq!(v.as_slices(), (&[][..], &[][..]));
+    v.reverse();
+    assert_eq!(v.as_slices(), (&[][..], &[][..]));
+
+    v.push_front(3);
+    v.push_front(2);
+    v.push_front(1);
+    assert_eq!(v.as_slices(), (&[1, 2, 3][..], &[][..]));
+    v.reverse();
+    assert_eq!(v.as_slices(), (&[3, 2, 1][..], &[][..]));
+
+    v.push_back(11);
+    v.push_back(12);
+    assert_eq!(v.as_slices(), (&[3, 2, 1][..], &[11, 12][..]));
+    v.reverse();
+    assert_eq!(v.as_slices(), (&[12, 11, 1][..], &[2, 3][..]));
+
+    v.push_back(21);
+    v.push_back(22);
+    v.push_back(23);
+    assert_eq!(v.as_slices(), (&[12, 11, 1][..], &[2, 3, 21, 22, 23][..]));
+    v.reverse();
+    assert_eq!(v.as_slices(), (&[23, 22, 21][..], &[3, 2, 1, 11, 12][..]));
+}
+
+#[test]
 fn test_retain() {
     let mut buf = VecDeque::new();
     buf.extend(1..5);

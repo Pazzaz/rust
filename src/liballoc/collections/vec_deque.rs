@@ -1838,6 +1838,62 @@ impl<T> VecDeque<T> {
         self.extend(other.drain(..));
     }
 
+    /// Reverses the order of elements in the `VecDeque`, in place.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(vec_deque_reverse)]
+    /// use std::collections::VecDeque;
+    /// 
+    /// fn main() {
+    ///     let mut buf = VecDeque::new();
+    ///     buf.push_back(1);
+    ///     buf.push_back(3);
+    ///     buf.push_back(5);
+    ///     buf.push_back(7);
+    ///     assert_eq!(buf, [1, 3, 5, 7]);
+    ///     buf.reverse();
+    ///     assert_eq!(buf, [7, 5, 3, 1]);
+    /// }
+    #[inline]
+    #[unstable(feature = "vec_deque_reverse", issue = "0")]
+    pub fn reverse(&mut self) {
+        let (front, back) = self.as_mut_slices();
+        let fl = front.len();
+        let bl = back.len();
+
+        // If one slice is longer, a section of it is reversed in place.
+        //
+        // front               back
+        // [A, B, C, D, E, F]  [1, 2, 3]
+        //           -------
+        // [A, B, C, F, E, D]  [1, 2, 3]
+        let shortest = if fl > bl {
+            front[bl..].reverse();
+            bl
+        } else {
+            if fl < bl {
+                back[..bl-fl].reverse();
+            }
+            fl
+        };
+
+        // Swap all values in the shorter slice with values in the longer one.
+        //
+        // [A, B, C, F, E, D]  [1, 2, 3]
+        //  --------            -------
+        // [3, 2, 1, F, E, D]  [C, B, A]
+        for i in 0..shortest {
+            // Avoid bounds checks
+            unsafe {
+                let pf: *mut T = front.get_unchecked_mut(i);
+                let pb: *mut T = back.get_unchecked_mut(bl - i - 1);
+                ptr::swap(pf, pb);
+            }
+        }
+    }
+
     /// Retains only the elements specified by the predicate.
     ///
     /// In other words, remove all elements `e` such that `f(&e)` returns false.
